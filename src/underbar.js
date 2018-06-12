@@ -113,12 +113,12 @@
       let iteratedValues = [];
       let actualValues = [];
       for (let i = 0; i < uniqueArray.length; i++) {
-        if (_.indexOf(iterated, iterator(uniqueArray[i])) === -1) {
-          iterated.push(iterator(uniqueArray[i]));
-          actual.push(uniqueArray[i]);
+        if (_.indexOf(iteratedValues, iterator(uniqueArray[i])) === -1) {
+          iteratedValues.push(iterator(uniqueArray[i]));
+          actualValues.push(uniqueArray[i]);
         }
       }
-      return actual;
+      return actualValues;
     }
     return uniqueArray;
   };
@@ -129,6 +129,11 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var storage = [];
+    _.each(collection, function(value,idx,collection){
+      storage.push(iterator(value,idx,collection));
+    })
+    return storage;
   };
 
   /*
@@ -170,6 +175,21 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    // iterator(accumulator, item)
+    let acc;
+    let collectionCopy = collection;
+    if(accumulator === undefined) {
+      acc = collection[0];
+      collectionCopy = collection.slice(1);
+    } else {
+      acc = accumulator;
+    }
+    //iterate through collection..
+    _.each(collectionCopy, function(value) {
+      acc = iterator(acc, value);
+    });
+    
+    return acc;
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -188,6 +208,15 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    // let result = false/;
+    iterator = iterator || function(val) {return val};
+    return _.reduce(collection, function(acc, val) {
+      if (iterator(val)) {
+        return acc;
+      } else {
+        return false;
+      }
+    }, true)
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
