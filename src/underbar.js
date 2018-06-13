@@ -223,6 +223,8 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || function(val) {return val};
+    return !(_.every(collection, function(val) {return !iterator(val)}));
   };
 
 
@@ -245,11 +247,23 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for (let i = 1; i < arguments.length; i++) {
+      for (let key in arguments[i]) {
+        obj[key] = arguments[i][key];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (let i = 1; i < arguments.length; i++) {
+      for (let key in arguments[i]) {
+        obj[key] = obj[key] === undefined ? arguments[i][key] : obj[key];
+      }
+    }
+    return obj;
   };
 
 
@@ -293,6 +307,16 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    //declare storage obj
+    var storageObject = {};
+    return function() {
+      let args = [...arguments];
+      let argsString = JSON.stringify(args.slice(1));
+      if (storageObject[argsString] === undefined) { 
+        storageObject[argsString] = func.apply(null, args);
+      }
+      return storageObject[argsString];
+    }
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -302,6 +326,10 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    let args = [...arguments].slice(2);
+    setTimeout(function(){
+      return func.apply(null,args);
+    },wait);
   };
 
 
@@ -316,6 +344,18 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    let result = [];
+    let arr = [...array];
+    let randomIndex;
+    while (result.length < array.length) {
+      randomIndex = Math.floor(arr.length * Math.random());
+      console.log('random: ', randomIndex);
+      result.push(arr[randomIndex]);
+      // debugger;
+      arr.splice(randomIndex, 1);
+    }
+    return result;
+    
   };
 
 
